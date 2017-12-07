@@ -50,7 +50,9 @@ try:
     import urllib.parse as _urlencode  # Python 3
     import urllib.request as _urllib
     import http.client as httplib
+    PYTHON3 = True
 except ImportError:
+    PYTHON3 = False
     import urllib as _urlencode        # Python 2
     import urllib2 as _urllib
     import httplib
@@ -96,6 +98,7 @@ class Exchange(object):
     trades = {}
     currencies = {}
     proxy = ''
+    http_proxy = ''
     apiKey = ''
     secret = ''
     password = ''
@@ -312,6 +315,8 @@ class Exchange(object):
         text = None
         try:  # send request and load response
             handler = _urllib.HTTPHandler if url.startswith('http://') else _urllib.HTTPSHandler
+            if PYTHON3 and self.http_proxy:
+                handler = _urllib.ProxyHandler({'http': self.http_proxy})
             opener = _urllib.build_opener(handler)
             response = opener.open(request, timeout=int(self.timeout / 1000))
             text = response.read()
